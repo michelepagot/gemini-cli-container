@@ -1,0 +1,88 @@
+{
+  "$schema": "https://aka.ms/devcontainer/v2/devcontainer.schema.json",
+  "name": "Gemini CLI Development Container",
+  "dockerComposeFile": "../docker-compose.yml",
+  "service": "gemini-dev",
+  "workspaceFolder": "/workspace",
+  
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": true,
+      "configureZshAsDefaultShell": true,
+      "installOhMyZsh": true,
+      "upgradePackages": true
+    },
+    "ghcr.io/devcontainers-contrib/features/zsh-plugins:0": {
+      "plugins": "git docker docker-compose node npm",
+      "omzPlugins": "https://github.com/zsh-users/zsh-autosuggestions https://github.com/zsh-users/zsh-syntax-highlighting",
+      "powerlevel10k": true
+    }
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "eamodio.gitlens",
+        "ms-azuretools.vscode-docker",
+        "orta.vscode-jest",
+        "bradlc.vscode-tailwindcss",
+        "formulahendry.auto-rename-tag",
+        "formulahendry.auto-close-tag"
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "zsh",
+        "terminal.integrated.fontFamily": "MesloLGS NF",
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "[typescript]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[javascript]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "editor.codeActionsOnSave": {
+          "source.fixAll.eslint": true
+        },
+        "files.exclude": {
+          "**/node_modules": true,
+          "**/.git": true
+        }
+      }
+    }
+  },
+
+  "forwardPorts": [3000, 8080, 8888],
+  
+  "postCreateCommand": ".devcontainer/post-create.sh",
+  
+  "remoteUser": "node",
+  
+  "mounts": [
+    "source=gemini-bashhistory,target=/commandhistory,type=volume",
+    "source=gemini-config,target=/home/node/.config/gemini,type=volume"
+  ],
+  
+  "runArgs": [
+    "--cap-add=NET_ADMIN",
+    "--cap-add=NET_RAW"
+  ],
+  
+  "containerEnv": {
+    "NODE_OPTIONS": "--max-old-space-size=4096",
+    "NPM_CONFIG_PREFIX": "/home/node/.npm-global",
+    "PATH": "/home/node/.npm-global/bin:${containerEnv:PATH}",
+    "GEMINI_DEVCONTAINER": "true",
+    "WORKSPACE_FOLDER": "/workspace"
+  },
+  
+  "updateContentCommand": "npm install",
+  
+  "portsAttributes": {
+    "3000": {
+      "label": "Application",
+      "onAutoForward": "notify"
+    }
+  }
+}

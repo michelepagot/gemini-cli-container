@@ -1,0 +1,129 @@
+version: '3.8'
+
+services:
+  gemini-dev:
+    build:
+      context: .
+      dockerfile: .devcontainer/Dockerfile
+    container_name: ${CONTAINER_NAME:-gemini-cli-dev}
+    hostname: gemini-devcontainer
+    
+    volumes:
+      # Workspace mount
+      - .:/workspace:cached
+      
+      # Persistent volumes
+      - gemini-bashhistory:/commandhistory
+      - gemini-config:/home/node/.config/gemini
+      - gemini-npm-cache:/home/node/.npm
+      - gemini-vscode-extensions:/home/node/.vscode-server/extensions
+      
+      # Docker socket for Docker-in-Docker (optional)
+      - /var/run/docker.sock:/var/run/docker.sock
+    
+    ports:
+      - "${APP_PORT:-3000}:3000"
+      - "8080:8080"
+      - "8888:8888"
+    
+    environment:
+      # Container environment
+      - NODE_ENV=development
+      - NODE_OPTIONS=--max-old-space-size=4096
+      - NPM_CONFIG_PREFIX=/home/node/.npm-global
+      - GEMINI_DEVCONTAINER=true
+      - WORKSPACE_FOLDER=/workspace
+      
+      # Security
+      - ENABLE_FIREWALL=${ENABLE_FIREWALL:-false}
+      
+      # API Configuration
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      
+      # Terminal configuration
+      - TERM=xterm-256color
+      - COLORTERM=truecolor
+      - LANG=en_US.UTF-8
+      - LC_ALL=en_US.UTF-8
+      
+      # Timezone (uses host timezone)
+      - TZ=${TZ:-UTC}
+    
+    # Required capabilities for firewall
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    
+    # Security options
+    security_opt:
+      - seccomp:unconfined  # Required for some development tools
+    
+    # Keep container running
+    stdin_open: true
+    tty: true
+    
+    # Restart policy
+    restart: unless-stopped
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "node", "--version"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+        reservations:
+          memory: 1G
+
+  # Optional: Database service for development
+  # Uncomment if you need a database for your Gemini applications
+  # postgres:
+  #   image: postgres:15-alpine
+  #   container_name: ${COMPOSE_PROJECT_NAME:-gemini-cli}-postgres
+  #   environment:
+  #     POSTGRES_DB: gemini_dev
+  #     POSTGRES_USER: gemini
+  #     POSTGRES_PASSWORD: gemini_password
+  #   volumes:
+  #     - gemini-postgres-data:/var/lib/postgresql/data
+  #   ports:
+  #     - "5432:5432"
+  #   restart: unless-stopped
+
+  # Optional: Redis service for caching
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: ${COMPOSE_PROJECT_NAME:-gemini-cli}-redis
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - gemini-redis-data:/data
+  #   restart: unless-stopped
+
+volumes:
+  # Persistent data volumes
+  gemini-bashhistory:
+    driver: local
+  gemini-config:
+    driver: local
+  gemini-npm-cache:
+    driver: local
+  gemini-vscode-extensions:
+    driver: local
+  
+  # Optional database volumes
+  # gemini-postgres-data:
+  #   driver: local
+  # gemini-redis-data:
+  #   driver: local
+
+networks:
+  default:
+    name: ${COMPOSE_PROJECT_NAME:-gemini-cli}-network
+    driver: bridge

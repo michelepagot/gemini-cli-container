@@ -1,0 +1,35 @@
+{
+  "name": "gemini-cli-devcontainer",
+  "version": "1.0.0",
+  "description": "DevContainer setup for Google Gemini CLI with security features",
+  "scripts": {
+    "setup": "./setup.sh",
+    "start": "docker-compose up -d",
+    "stop": "docker-compose stop",
+    "restart": "docker-compose restart",
+    "logs": "docker-compose logs -f",
+    "build": "docker-compose build",
+    "rebuild": "docker-compose build --no-cache",
+    "shell": "docker exec -it gemini-cli-dev zsh",
+    "gemini": "docker exec -it gemini-cli-dev gemini",
+    "cleanup": "docker-compose down -v",
+    "status": "docker-compose ps"
+  },
+  "keywords": [
+    "gemini",
+    "ai",
+    "cli",
+    "devcontainer",
+    "docker",
+    "development",
+    "google",
+    "typescript",
+    "nodejs"
+  ],
+  "author": "Gemini DevContainer",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0",
+    "docker": ">=20.0.0"
+  }
+}
