@@ -30,8 +30,11 @@ RUN apt-get update --allow-releaseinfo-change && apt-get upgrade -y && export DE
 # Install optional packages that may not be available in all mirrors
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
     && apt-get -y install --no-install-recommends \
-    fonts-powerline \
-    git-delta 2>/dev/null || true \
+    fonts-powerline 2>/dev/null || true
+    
+# Try to install git-delta if available, but don't fail if not
+RUN apt-get -y install --no-install-recommends \
+    git-delta 2>/dev/null || echo "git-delta not available, skipping" \
     && apt-get autoremove -y && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
 
