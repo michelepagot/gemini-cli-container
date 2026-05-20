@@ -1,11 +1,10 @@
 FROM node:20-bookworm
 
 # Install basic tools and dependencies
-RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
+RUN apt-get update --allow-releaseinfo-change && apt-get upgrade -y && export DEBIAN_FRONTEND=noninteractive \
     && apt-get -y install --no-install-recommends \
     sudo \
     git \
-    git-delta \
     build-essential \
     python3 \
     python3-pip \
@@ -15,19 +14,24 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
     gnupg \
     lsb-release \
     zsh \
-    fonts-powerline \
     locales \
-    # Network tools for firewall
     iptables \
     ipset \
     net-tools \
     dnsutils \
-    # Additional dev tools
     jq \
     tmux \
     vim \
     nano \
     htop \
+    && apt-get autoremove -y && apt-get clean -y \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install optional packages that may not be available in all mirrors
+RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
+    && apt-get -y install --no-install-recommends \
+    fonts-powerline \
+    git-delta 2>/dev/null || true \
     && apt-get autoremove -y && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
 
